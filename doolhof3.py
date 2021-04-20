@@ -1,11 +1,12 @@
 from copy import deepcopy
 
 class state():
-    def __init__(self, pos, tran_val,value=0, agent_in_cell=False):
+    def __init__(self, pos, tran_val,value=0, agent_in_cell=False, is_final=False):
         self.pos = pos
         self.tran_val = tran_val
         self.value = value
         self.agent_in_cell = agent_in_cell
+        self.is_final = is_final
     
     def set_neigbors(self, all_agents):
         self.neigbors = [all_agents.get("{}_{}".format(int(self.pos[0]) -1, self.pos[2])), #Left 
@@ -14,14 +15,10 @@ class state():
                         all_agents.get("{}_{}".format(self.pos[0], int(self.pos[2]) -1)),] #Down
 
     def get_new_val(self):
-        vals = []
-        for agent in self.neigbors:
-            if agent != None:
-                vals.append(agent.value + agent.tran_val)
-            else:
-                pass
-
-        return max(vals)
+        if not self.is_final:
+            return max([(agent.value + agent.tran_val) for agent in self.neigbors if agent != None])
+        else:
+            return 0
     
     def __repr__(self):
         if self.agent_in_cell:
@@ -48,12 +45,14 @@ for i in range(4):
 
 
 
-for i in range(10):
+for i in range(25):
     print(i)
     new_agent_dict = {}
     for agent in agent_dict.values():
         agent.set_neigbors(agent_dict)
     
+    agent_dict["0_3"].is_final = True
+    agent_dict["3_0"].is_final = True
     for agent in agent_dict.values():
         update_agent = deepcopy(agent)
         update_agent.value = agent.get_new_val()
