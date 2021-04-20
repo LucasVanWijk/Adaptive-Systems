@@ -16,8 +16,3 @@
 #     cloudy = f_cloudy(sunny,cloudy,rain)
 #     sunny = f_sunny(sunny,cloudy,0)
 
-state1 = 0
-state2 = 0
-state3 = 0
-= {s1: [(-0.1, state2)]}
-
