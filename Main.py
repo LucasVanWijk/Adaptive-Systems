@@ -1,27 +1,26 @@
 import State
+import Policy
 from World import World_Class
 
-def create_states(deterministic=True):
-    """[summary]
+def create_states(class_type,
+                  trans_values=[-1,-1,-1,40, -1,-1,-10,-10, -1,-1,-1,-1, 10,-2,-1,-1]):
+    """Creates a dict of states
 
     Args:
-        deterministic (bool, optional): Specifies if the behavior of the agent
-                                        in this state should be deterministic or not. 
-                                        Defaults to True.
+        class_type (Class (State)): The class of states that need to be created
+        trans_values (list): The value a agent would get if it entered this state. 
+                             Ordered on occurrence
 
     Returns:
-        List: A list of all the states a agent can be in
+        [dict]: a dict where the position is the key.
+                and it's value the agent at that state.
     """
 
     # The reward a agent would get for moving to this state
-    trans_values = [-1,-1,-1,40, -1,-1,-10,-10, -1,-1,-1,-1, 10,-2,-1,-1]
+    
     val_iter = 0
     states = {}
-    if deterministic:
-        class_type = State.State_Deterministic
-    else:
-        class_type = State.State_Non_Deterministic
-    
+
     for i in range(4):
         for ii in range(4):
             pos = f"{i}_{ii}"
@@ -52,12 +51,24 @@ def set_neighbors(pos, all_agents):
     
     return neighbors
 
+def create_maze_states(state_type):
+    states = create_states(state_type)
+    for state in states.values():
+        # 0_3", "3_0 are final states and should have no neighbors
+        if state.pos not in ["0_3", "3_0"]:
+            state.neighbors = set_neighbors(state.pos, states)
+    
+    return states
 
-states = create_states(deterministic=False)
+states = create_maze_states(State.State_Non_Deterministic)
+world_value_iterations = World_Class(states)
+world_value_iterations.value_iterations(100, [100])
+
+states = create_maze_states(Policy.Monte_State)
+world_monte_carlo = World_Class(states)
+
+random_policy = {}
 for state in states.values():
-    # 0_3", "3_0 are final states and should have no neighbors
-    if state.pos not in ["0_3", "3_0"]:
-        state.neighbors = set_neighbors(state.pos, states)
+    random_policy[state.pos] = state.neighbors
 
-world_instance = World_Class(states)
-world_instance.value_iterations(1000, [1,2,5,10,25,50, 75, 100] + list(range(100, 1000, 200)))
+world_monte_carlo.monte_carlo(random_policy, nmb_iterations=50000, print_interval=[0,1,50000])
