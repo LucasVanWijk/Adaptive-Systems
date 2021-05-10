@@ -8,6 +8,7 @@ class State_Class():
         self.value = value
         self.state_in_cell = state_in_cell
         self.neighbors = None
+        self.num_first_visit = 0
 
     def get_new_val(self):
         """Returns the maximum value (reward + value of next state * discount value)
@@ -38,6 +39,9 @@ class State_Class():
             return "[{}]".format(self.value)
         else:
             return "{}".format(self.value)
+    
+    def __gt__(self, other):
+        return self.value > other.value
     
 
 

@@ -60,10 +60,6 @@ def create_maze_states(state_type):
     
     return states
 
-states = create_maze_states(State.State_Non_Deterministic)
-world_value_iterations = World_Class(states)
-world_value_iterations.value_iterations(100, [100])
-
 states = create_maze_states(Policy.Monte_State)
 world_monte_carlo = World_Class(states)
 
@@ -71,4 +67,19 @@ random_policy = {}
 for state in states.values():
     random_policy[state.pos] = state.neighbors
 
-world_monte_carlo.monte_carlo(random_policy, nmb_iterations=50000, print_interval=[0,1,50000])
+# world_monte_carlo.monte_carlo(random_policy, nmb_iterations=10000, print_interval=[9999])
+# world_monte_carlo.monte_carlo(random_policy, nmb_iterations=10000, print_interval=[9999])
+
+states = create_maze_states(State.State_Deterministic)
+world_value_iterations = World_Class(states)
+pol_states = world_value_iterations.value_iterations(100, [100])
+
+optimal_policy = {}
+for key in pol_states:
+    neighbors = pol_states[key].neighbors
+    if neighbors is not None:
+        valid_neighbors = [n for n in pol_states[key].neighbors if n != None]
+        optimal_policy[key] = [max(valid_neighbors)]
+
+states = create_maze_states(Policy.Monte_State)
+world_monte_carlo.monte_carlo(optimal_policy, nmb_iterations=10000, print_interval=[9999])
