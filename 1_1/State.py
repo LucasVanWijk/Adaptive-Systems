@@ -1,3 +1,4 @@
+from statistics import mean
 class State_Class():
     """A universal state class usable in all MRP problems
     """
@@ -40,4 +41,7 @@ class State_Class():
             return "{}".format(self.value)
     
     def __gt__(self, other):
-        return self.value > other.value
+        if other is None:
+            return self.value
+        else:
+            return self.value > other.value

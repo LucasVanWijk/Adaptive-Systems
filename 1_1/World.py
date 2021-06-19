@@ -3,7 +3,7 @@ import statistics
 
 
 class Agent():
-    def __init__(self, current_state, policy, deterministic=False):
+    def __init__(self, current_state, policy, deterministic):
         self.current_state = current_state
         self.policy = policy
         self.visits = [current_state]
@@ -20,8 +20,7 @@ class Agent():
             
             if preferred_next_state != None:
                 self.current_state = preferred_next_state
-                self.current_state.visited += 1
-                self.visits = self.visits + [self.current_state]
+                self.visits += [self.current_state]
     
     def run_sim(self):
             is_final = False
@@ -34,10 +33,11 @@ class Agent():
 
 
 class World_Class():
-    def __init__(self, state_dict):
+    def __init__(self, state_dict, deterministic=True):
         self.state_dict = state_dict # A dict of all states in this world
+        self.deterministic = deterministic
     
-    def value_iterations(self, nmb_iterations=25, print_interval=None):
+    def value_iterations(self, nmb_iterations=25, print_interval=None, deterministic=True):
         """Iterates over all the states and assigns it a new value according to the theory of value iteration.
 
         Args:
@@ -51,14 +51,40 @@ class World_Class():
         
         for i in range(nmb_iterations+1):
             for state in self.state_dict.values():
-                state.value = state.get_new_val()
+                neighbors = state.neighbors
+                if neighbors is not None:
+                    all_actions = [(state.value + state.tran_val) for state in neighbors if state != None]
+                    if deterministic:
+                        state.value = max(all_actions)
+                    else:
+                        weighted_actions = []
+                        for action in all_actions:
+                            other = all_actions.copy()
+                            other.remove(action)
+                            weighted_actions.append(action*0.7 + mean(other)*0.3)
+                        state.value = max(all_actions)
+
             if i in print_interval:
                 print(i)
                 self.print_world()
         
-        return self.state_dict
+        policy = {}
+        for key in self.state_dict:
+            neighbors = self.state_dict[key].neighbors
+            action = None
+            if neighbors is not None:
+                for neighbor in neighbors:
+                    if neighbor is not None:
+                        if action is None:
+                            action = neighbor
+                        else:
+                            if (action.value + action.tran_val) < (neighbor.value + neighbor.tran_val):
+                                action = neighbor
+            policy[key] = [action]
+        return policy
+        
     
-    def monte_carlo(self, policy, nmb_iterations=25, print_interval=None, discount=1):
+    def mcpe(self, nmb_iterations=25, print_interval=None, discount=1):
         """Iterates over all the states and assigns it a new value according to the theory of value iteration.
 
         Args:
@@ -73,14 +99,15 @@ class World_Class():
         for i in range(nmb_iterations+1):
             random_pos = random.choice(list(self.state_dict.keys()))
             start_state = self.state_dict[random_pos]            
-            visits = Agent(start_state, policy).run_sim()
+            visits = Agent(start_state, self.policy, self.deterministic).run_sim()
             visits.reverse()
             G = 0
-            counter = 1
+            counter = 0
             new_reward_dict = {key: 0 for key in self.state_dict.keys()}
             for visit in visits:
                 new_reward_dict[visit.pos] = G * (discount**counter)
                 G += visit.tran_val
+                counter += 1
                 
             
             for visit in visits:
@@ -100,6 +127,11 @@ class World_Class():
                 #     print(v.pos)
                 print([visit.pos for visit in visits])
                 self.print_world()
+    
+    def set_state_val_to_zero(self):
+        for state in self.state_dict.values():
+            state.value = 0
+
     
     def print_world(self):
         """Prints a representation of the world """

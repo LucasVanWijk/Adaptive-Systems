@@ -1,9 +1,7 @@
 import State
-import Policy
 from World import World_Class
 
-def create_states(class_type,
-                  trans_values=[-1,-1,-1,40, -1,-1,-10,-10, -1,-1,-1,-1, 10,-2,-1,-1]):
+def create_states(trans_values=[-1,-1,-1,40, -1,-1,-10,-10, -1,-1,-1,-1, 10,-2,-1,-1]):
     """Creates a dict of states
 
     Args:
@@ -24,7 +22,7 @@ def create_states(class_type,
     for i in range(4):
         for ii in range(4):
             pos = f"{i}_{ii}"
-            states[pos] = class_type(pos, trans_values[val_iter])
+            states[pos] = State.State_Class(pos, trans_values[val_iter])
             val_iter += 1
             
     return states
@@ -51,8 +49,8 @@ def set_neighbors(pos, all_agents):
     
     return neighbors
 
-def create_maze_states(state_type):
-    states = create_states(state_type)
+def create_maze_states():
+    states = create_states()
     for state in states.values():
         # 0_3", "3_0 are final states and should have no neighbors
         if state.pos not in ["0_3", "3_0"]:
@@ -60,26 +58,14 @@ def create_maze_states(state_type):
     
     return states
 
-states = create_maze_states(Policy.Monte_State)
-world_monte_carlo = World_Class(states)
+states = create_maze_states()
 
-random_policy = {}
-for state in states.values():
-    random_policy[state.pos] = state.neighbors
+world_instance = World_Class(states)
+optimal_policy = world_instance.value_iterations(100)
+print(optimal_policy)
+world_instance.policy = optimal_policy
+world_instance.set_state_val_to_zero()
+world_instance.mcpe(nmb_iterations=10000, print_interval=[10000], discount=1)
+world_instance.set_state_val_to_zero()
+world_instance.mcpe(nmb_iterations=10000, print_interval=[10000], discount=0.9)
 
-# world_monte_carlo.monte_carlo(random_policy, nmb_iterations=10000, print_interval=[9999])
-# world_monte_carlo.monte_carlo(random_policy, nmb_iterations=10000, print_interval=[9999])
-
-states = create_maze_states(State.State_Deterministic)
-world_value_iterations = World_Class(states)
-pol_states = world_value_iterations.value_iterations(100, [100])
-
-optimal_policy = {}
-for key in pol_states:
-    neighbors = pol_states[key].neighbors
-    if neighbors is not None:
-        valid_neighbors = [n for n in pol_states[key].neighbors if n != None]
-        optimal_policy[key] = [max(valid_neighbors)]
-
-states = create_maze_states(Policy.Monte_State)
-world_monte_carlo.monte_carlo(optimal_policy, nmb_iterations=10000, print_interval=[9999])
