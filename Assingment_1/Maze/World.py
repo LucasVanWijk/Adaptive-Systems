@@ -20,6 +20,7 @@ class World_Class():
             if i in print_interval:
                 print(i)
                 self.print_world()
+        return self.state_dict
     
     def print_world(self):
         """Prints a representation of the world

@@ -53,11 +53,16 @@ def set_neighbors(pos, all_agents):
     return neighbors
 
 
-states = create_states(deterministic=False)
-for state in states.values():
-    # 0_3", "3_0 are final states and should have no neighbors
-    if state.pos not in ["0_3", "3_0"]:
-        state.neighbors = set_neighbors(state.pos, states)
+def create_maze():
+    states = create_states(deterministic=False)
+    for state in states.values():
+        # 0_3", "3_0 are final states and should have no neighbors
+        if state.pos not in ["0_3", "3_0"]:
+            state.neighbors = set_neighbors(state.pos, states)
+    return states
 
-world_instance = World_Class(states)
-world_instance.value_iterations(1000, [1,2,5,10,25,50, 75, 100] + list(range(100, 1000, 200)))
+
+world_instance = World_Class(create_maze())
+foo = world_instance.value_iterations(1000, [1,2,5,10,25,50, 75, 100])
+print("\n\n\n")
+print(foo)

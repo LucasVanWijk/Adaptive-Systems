@@ -1,4 +1,6 @@
 from statistics import mean
+
+
 class State_Class():
     """A universal state class usable in all MRP problems
     """
@@ -35,11 +37,9 @@ class State_Class():
             [string]: The string representation of the class
         """
         if self.state_in_cell:
-            return "[{}]".format(self.value)
+            return "[{}]".format(round(self.value, 5))
         else:
-            return "{}".format(self.value)
-    
-
+            return "{}".format(round(self.value, 5))
 
 
 class State_Deterministic(State_Class):
