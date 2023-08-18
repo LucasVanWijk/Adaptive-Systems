@@ -14,7 +14,7 @@ def create_states(deterministic=True):
     """
 
     # The reward a agent would get for moving to this state
-    trans_values = [-1,-1,-1,40, -1,-1,-10,-10, -1,-1,-1,-1, 10,-2,-1,-1]
+    trans_values = [10, -2, -1, -1,   -1, -1, -1, -1,   -1, -1, -10, -10,   -1, -1, -1, 40]
     val_iter = 0
     states = {}
     if deterministic:
@@ -24,7 +24,7 @@ def create_states(deterministic=True):
     
     for i in range(4):
         for ii in range(4):
-            pos = f"{i}_{ii}"
+            pos = f"{ii}_{i}"
             states[pos] = class_type(pos, trans_values[val_iter])
             val_iter += 1
             
@@ -53,16 +53,15 @@ def set_neighbors(pos, all_agents):
     return neighbors
 
 
-def create_maze():
-    states = create_states(deterministic=False)
+def create_maze(deterministic=True):
+    states = create_states(deterministic)
     for state in states.values():
-        # 0_3", "3_0 are final states and should have no neighbors
-        if state.pos not in ["0_3", "3_0"]:
+        if state.pos not in ["0_0", "3_3"]:
             state.neighbors = set_neighbors(state.pos, states)
     return states
 
-
-world_instance = World_Class(create_maze())
-foo = world_instance.value_iterations(1000, [1,2,5,10,25,50, 75, 100])
-print("\n\n\n")
-print(foo)
+if __name__ == "__main__":
+    world_instance = World_Class(create_maze())
+    foo = world_instance.value_iterations(1000, [1,2,5,10,25,50, 75, 100])
+    print("\n\n\n")
+    print(foo)

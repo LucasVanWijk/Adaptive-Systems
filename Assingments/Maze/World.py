@@ -11,23 +11,26 @@ class World_Class():
                                                at which the world needs to be printed. 
                                                Defaults to None.
         """
-        if print_interval == None:
-            print_interval = [nmb_iterations-1]
+        # if print_interval == None:
+        #     print_interval = [nmb_iterations-1]
         
         for i in range(nmb_iterations):
             for state in self.state_dict.values():
                 state.value = state.get_new_val()
-            if i in print_interval:
-                print(i)
-                self.print_world()
+            # if i in print_interval:
+            #     print(i)
+            #     self.print_world()
         return self.state_dict
     
     def print_world(self):
         """Prints a representation of the world
         """
         base = ""
-        for i in range(4):
+        i = 3
+        while i > 0 :
             for ii in range(4):
-                base += "   " + self.state_dict[f"{i}_{ii}"].__repr__() + "    "
+                base += "   " + self.state_dict[f"{ii}_{i}"].__repr__() + "    "
             print(base)
             base = ""
+            i -= 1
+
